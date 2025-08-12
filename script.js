@@ -1,5 +1,9 @@
 //You can edit ALL of the code here
 
+let allEpisodes = []; // store all episodes globally so that other functions can access it.
+
+window.onload = setup;
+
 async function setup() {
   try {
     // Show loading message
@@ -31,7 +35,9 @@ async function setup() {
         a.season === b.season ? a.number - b.number : a.season - b.season
       );
 
+    allEpisodes = episodeList;
     makePageForEpisodes(episodeList);
+    initEventListeners();
   } catch (error) {
     console.error("Error fetching episodes:", error);
 
@@ -74,10 +80,6 @@ function showMessage(message, type = "info") {
   }
 
   rootElem.appendChild(messageDiv);
-let allEpisodes = []; // store all episodes globally so that other functions can access it.
-function setup() {
-  allEpisodes = getAllEpisodes();
-  makePageForEpisodes(allEpisodes);
 }
 
 function makePageForEpisodes(episodeList) {
@@ -100,7 +102,9 @@ function makePageForEpisodes(episodeList) {
   episodeList.forEach((episode) => {
     const episodeCard = template.content.cloneNode(true);
 
-    const codeAndSeason = `S${String(episode.season).padStart(2, "0")}E${String(episode.number).padStart(2, "0")}`;
+    const codeAndSeason = `S${String(episode.season).padStart(2, "0")}E${String(
+      episode.number
+    ).padStart(2, "0")}`;
 
     episodeCard.querySelector(".episode-card").id = codeAndSeason;
     episodeCard.querySelector(".episode-title").textContent = episode.name;
@@ -118,8 +122,14 @@ function makePageForEpisodes(episodeList) {
     episodeListElem.appendChild(episodeCard);
   });
 
+  updateEpisodeSelect();
+}
+
+function updateEpisodeSelect() {
   //query the selector select
-  const selectEpisodeList = document.querySelector("select");
+  const selectEpisodeList = document.querySelector("#drop-down-search");
+  if (!selectEpisodeList) return;
+
   selectEpisodeList.innerHTML = "";
 
   // default first option on select drop-down list
@@ -130,45 +140,59 @@ function makePageForEpisodes(episodeList) {
 
   //Create episode option and set its value
   for (let i = 0; i < allEpisodes.length; i++) {
-    const episodeCodeAndSeason = `S${String(allEpisodes[i].season).padStart(2,"0")}E${String(allEpisodes[i].number).padStart(2, "0")}`;
+    const episodeCodeAndSeason = `S${String(allEpisodes[i].season).padStart(
+      2,
+      "0"
+    )}E${String(allEpisodes[i].number).padStart(2, "0")}`;
     const option = document.createElement("option");
     option.setAttribute("value", episodeCodeAndSeason);
     option.text = `${episodeCodeAndSeason} - ${allEpisodes[i].name}`;
     selectEpisodeList.appendChild(option);
   }
-  
-  //this handles episode selection
-  selectEpisodeList.addEventListener("change", function () {
-    const allEpisodeCode = this.value;
-    const cards = document.querySelectorAll(".episode-card");
-
-    //This is to remove any existing highlight from the card
-    cards.forEach((card) => card.classList.remove("selected-episode"));
-
-    if (allEpisodeCode === "allEpisodes") {
-      window.scrollTo({ top: 0, behavior: "smooth" }); // scrolls the page smoothly to the top
-    } else {
-      const card = document.getElementById(allEpisodeCode);
-      if (card) {
-        card.scrollIntoView({ behavior: "smooth" });
-        card.classList.add("selected-episode");
-      }
-    }
-  });
 }
 
-//filters episodes based on user search and re-render the page.
-function render() {
-  const filteredEpisodes = allEpisodes.filter(function (episode) {
-    return episode.name.toLowerCase().includes(input.value.toLowerCase());
-  });
-  makePageForEpisodes(filteredEpisodes);
+function initEventListeners() {
+  //this handles episode selection
+  const selectEpisodeList = document.querySelector("#drop-down-search");
+
+  if (selectEpisodeList) {
+    selectEpisodeList.addEventListener("change", function () {
+      const allEpisodeCode = this.value;
+      const cards = document.querySelectorAll(".episode-card");
+
+      //This is to remove any existing highlight from the card
+      cards.forEach((card) => card.classList.remove("selected-episode"));
+
+      if (allEpisodeCode === "allEpisodes") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        // scrolls the page smoothly to the top
+      } else {
+        const card = document.getElementById(allEpisodeCode);
+        if (card) {
+          card.scrollIntoView({ behavior: "smooth" });
+          card.classList.add("selected-episode");
+        }
+      }
+    });
+  }
 }
 
 //Get input field and listen to user type
 const input = document.querySelector("input");
-input.addEventListener("keyup", function () {
-  render();
-});
+if (input) {
+  input.addEventListener("keyup", function () {
+    render(input);
+  });
+}
 
-window.onload = setup;
+//filters episodes based on user search and re-render the page.
+function render(input) {
+  const value = (input?.value || "").toLowerCase();
+  const filteredEpisodes = allEpisodes.filter(function (episode) {
+    return (
+      episode.name.toLowerCase().includes(value) ||
+      (episode.summary && episode.summary.toLowerCase().includes(value))
+    );
+  });
+  makePageForEpisodes(filteredEpisodes);
+}
