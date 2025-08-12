@@ -29,6 +29,12 @@ body,
   padding-bottom: 60px;
 }
 
+#episode-count {
+  font-size: 1.2rem;
+  color: #e5e5e5;
+  margin-bottom: 30px;
+}
+
 h1,
 h2,
 h3,
@@ -77,7 +83,7 @@ a:hover {
 }
 
 .episode-card {
-  background: #181818;
+  background: #2c2c2c;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
   padding: 16px;
@@ -91,7 +97,9 @@ a:hover {
 
 .episode-card:hover {
   transform: scale(1.05);
+  background: #353535;
 }
+
 .episode-card img {
   width: 100%;
   height: 180px;
@@ -136,28 +144,61 @@ a:hover {
   box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.5);
   z-index: 100;
 }
+
+.message {
+  padding: 20px;
+  margin: 20px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.message-loading {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.message-error {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.retry-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.retry-button:hover {
+  background-color: #0d47a1;
+}
+
+.retry-button:active {
+  background-color: #0b3c91;
+}
 /* drop down search */
-#drop-down-search{
+#drop-down-search {
   width: 15%;
   font-size: 0.9rem;
   padding: 2px 5px;
   color: green;
 }
 
-.selected-episode{
+.selected-episode {
   background: #e50914;
   transition: background 0.4s ease-in-out, transform 0.3s ease;
   transform: scale(1.05);
 }
 
-
-.header-search{
+.header-search {
   display: flex;
   gap: 3rem;
   margin-top: 30px;
 }
 
-#search{
-padding: 7px;
-
+#search {
+  padding: 7px;
 }
