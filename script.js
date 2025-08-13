@@ -123,6 +123,7 @@ function makePageForEpisodes(episodeList) {
   });
 
   updateEpisodeSelect();
+
 }
 
 function updateEpisodeSelect() {
@@ -150,6 +151,17 @@ function updateEpisodeSelect() {
     selectEpisodeList.appendChild(option);
   }
 }
+
+// -----------TV shows drop-down select-----------
+function updateTvShowSelect(){
+const tvShows = document.querySelector("#tv-shows")
+  const tvShowDefaultOption = document.createElement("option")
+    tvShowDefaultOption.value = "allTvShows";
+    tvShowDefaultOption.text = "--Choose Tv show--";
+    tvShows.appendChild(tvShowDefaultOption);
+}
+updateTvShowSelect();
+
 
 function initEventListeners() {
   //this handles episode selection
