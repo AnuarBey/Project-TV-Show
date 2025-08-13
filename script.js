@@ -2,6 +2,7 @@
 
 let allEpisodes = []; // store all episodes globally so that other functions can access it.
 let allTvShows = [];
+const rootElem = document.getElementById("root");
 window.onload = setup;
 
 async function setup() {
@@ -9,8 +10,10 @@ async function setup() {
     // Show loading message
     showMessage("Loading episodes...", "loading");
 
-    const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
-    const responseTvShow = await fetch("https://api.tvmaze.com/shows");
+    // const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
+    const response = await fetch("./episodes.json");
+    // const responseTvShow = await fetch("https://api.tvmaze.com/shows");
+    const responseTvShow = await fetch("./shows.json");
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -31,8 +34,8 @@ async function setup() {
     if (!Array.isArray(dataTvShow) || dataTvShow.length === 0) {
       throw new Error("No Tv show found");
     }
-    // console.log(dataTvShow[0])
-    // console.log(data[0])
+    // console.log(dataTvShow)
+    // console.log(dataTvShow)
     const episodeList = data
       .map((episode) => ({
         id: episode.id,
@@ -94,7 +97,7 @@ function showMessage(message, type = "info") {
 }
 
 function makePageForEpisodes(episodeList) {
-  const rootElem = document.getElementById("root");
+
   rootElem.innerHTML = "";
 
   const header = document.createElement("div");
@@ -161,6 +164,7 @@ function updateEpisodeSelect() {
     selectEpisodeList.appendChild(option);
   }
 }
+
 
 // -----------TV shows drop-down select-----------
 function updateTvShowSelect() {
