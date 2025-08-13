@@ -1,7 +1,7 @@
 //You can edit ALL of the code here
 
 let allEpisodes = []; // store all episodes globally so that other functions can access it.
-
+let allTvShows = [];
 window.onload = setup;
 
 async function setup() {
@@ -10,18 +10,29 @@ async function setup() {
     showMessage("Loading episodes...", "loading");
 
     const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
+    const responseTvShow = await fetch("https://api.tvmaze.com/shows");
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
+    if (!responseTvShow) {
+      throw new Error(`HTTP error! status: ${responseTvShow.status}`);
+    }
+
     const data = await response.json();
+    const dataTvShow = await responseTvShow.json();
 
     // Check if we got valid data
     if (!Array.isArray(data) || data.length === 0) {
       throw new Error("No episodes found for this show");
     }
 
+    if (!Array.isArray(dataTvShow) || dataTvShow.length === 0) {
+      throw new Error("No Tv show found");
+    }
+    // console.log(dataTvShow[0])
+    // console.log(data[0])
     const episodeList = data
       .map((episode) => ({
         id: episode.id,
@@ -123,7 +134,6 @@ function makePageForEpisodes(episodeList) {
   });
 
   updateEpisodeSelect();
-
 }
 
 function updateEpisodeSelect() {
@@ -153,15 +163,14 @@ function updateEpisodeSelect() {
 }
 
 // -----------TV shows drop-down select-----------
-function updateTvShowSelect(){
-const tvShows = document.querySelector("#tv-shows")
-  const tvShowDefaultOption = document.createElement("option")
-    tvShowDefaultOption.value = "allTvShows";
-    tvShowDefaultOption.text = "--Choose Tv show--";
-    tvShows.appendChild(tvShowDefaultOption);
+function updateTvShowSelect() {
+  const tvShows = document.querySelector("#tv-shows");
+  const tvShowDefaultOption = document.createElement("option");
+  tvShowDefaultOption.value = "allTvShows";
+  tvShowDefaultOption.text = "--Choose Tv show--";
+  tvShows.appendChild(tvShowDefaultOption);
 }
 updateTvShowSelect();
-
 
 function initEventListeners() {
   //this handles episode selection
