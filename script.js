@@ -163,8 +163,14 @@ function updateEpisodeSelect() {
     option.text = `${episodeCodeAndSeason} - ${allEpisodes[i].name}`;
     selectEpisodeList.appendChild(option);
   }
-}
+}function makePageForTvShow (showList){
+  rootElem.innerHTML = "";
+  //create div to hold all episode cards
+  const showListDiv = document.createElement("div")
+  showListDiv.id = "show-list"
+  rootElem.appendChild(showListDiv)
 
+}
 
 // -----------TV shows drop-down select-----------
 function updateTvShowSelect() {
