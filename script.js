@@ -19,7 +19,7 @@ async function setup() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    if (!responseTvShow) {
+    if (!responseTvShow.ok) {
       throw new Error(`HTTP error! status: ${responseTvShow.status}`);
     }
 
@@ -49,8 +49,23 @@ async function setup() {
         a.season === b.season ? a.number - b.number : a.season - b.season
       );
 
+
+      const tvShowList = dataTvShow.map((show) => ({
+        // id: show.id,
+        name: show.name,
+        rating: show.rating?.average || "N/A",
+        genres: show.genres.join(","),
+        summary: show.summary,
+        image: show.image?.medium || null,
+      }));
+
+
+
     allEpisodes = episodeList;
-    makePageForEpisodes(episodeList);
+    allTvShows = tvShowList;
+
+    // makePageForEpisodes(episodeList);
+    makePageForTvShow(allTvShows);
     initEventListeners();
   } catch (error) {
     console.error("Error fetching episodes:", error);
@@ -163,14 +178,36 @@ function updateEpisodeSelect() {
     option.text = `${episodeCodeAndSeason} - ${allEpisodes[i].name}`;
     selectEpisodeList.appendChild(option);
   }
-}function makePageForTvShow (showList){
+}
+
+function makePageForTvShow (showList){
   rootElem.innerHTML = "";
   //create div to hold all episode cards
-  const showListDiv = document.createElement("div")
-  showListDiv.id = "show-list"
-  rootElem.appendChild(showListDiv)
+  const showListDiv = document.createElement("div");
+  showListDiv.id = "show-list";
+  rootElem.appendChild(showListDiv);
 
+  //clone Tv show  template
+  const templateTvShow = document.getElementById("Tv-show-template");
+  showList.forEach((show)=>{
+    const showCard = templateTvShow.content.cloneNode(true);
+    showCard.querySelector(".tv-show-title").textContent = show.name;
+    showCard.querySelector(".tv-show-rating").textContent = show.rating;
+    showCard.querySelector(".tv-show-genres").textContent = show.genres;
+    showCard.querySelector(".tv-show-summary").innerHTML = show.summary;
+
+    // Handle tv show missing images gracefully
+    const imgElementTvShow = showCard.querySelector(".tv-show-img");
+    if (show.image) {
+      imgElementTvShow.src = show.image;
+    } else {
+      imgElementTvShow.style.display = "none";
+    }
+     showListDiv.appendChild(showCard);
+  })
+  updateTvShowSelect();
 }
+
 
 // -----------TV shows drop-down select-----------
 function updateTvShowSelect() {
@@ -180,7 +217,7 @@ function updateTvShowSelect() {
   tvShowDefaultOption.text = "--Choose Tv show--";
   tvShows.appendChild(tvShowDefaultOption);
 }
-updateTvShowSelect();
+
 
 function initEventListeners() {
   //this handles episode selection
