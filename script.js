@@ -2,6 +2,7 @@
 
 let allEpisodes = []; // store all episodes globally so that other functions can access it.
 let allTvShows = []; // store all Tv shows globally.
+let showEpisodesCache = {}; // Store fetched episodes to prevent duplicate fetches from Api.
 const rootElem = document.getElementById("root");
 window.onload = setup;
 
@@ -228,6 +229,13 @@ function updateTvShowSelect() {
 
 // ------async function to fetch and display show episodes-------
 async function fetchAndDisplayShowEpisodes(showId) {
+  //Check cache first, if we already have the episode, use it.
+  if (showEpisodesCache[showId]) {
+    console.log("This is from episode catch:", showId);
+    allEpisodes = showEpisodesCache[showId];
+    makePageForEpisodes(showEpisodesCache[showId]);
+    return;
+  }
   try {
     // Show loading message
     showMessage("Loading episodes...", "loading");
@@ -254,8 +262,9 @@ async function fetchAndDisplayShowEpisodes(showId) {
       .sort((a, b) =>
         a.season === b.season ? a.number - b.number : a.season - b.season
       );
-    //this will update global episodes and display them
+    //this will update global episodes and display them all.
     allEpisodes = episodeList;
+    showEpisodesCache[showId] = episodeList; // saves to cache
     makePageForEpisodes(episodeList);
   } catch (error) {
     console.error("Error fetching episodes:", error);
