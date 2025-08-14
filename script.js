@@ -1,7 +1,7 @@
 //You can edit ALL of the code here
 
 let allEpisodes = []; // store all episodes globally so that other functions can access it.
-let allTvShows = [];
+let allTvShows = []; // store all Tv shows globally.
 const rootElem = document.getElementById("root");
 window.onload = setup;
 
@@ -34,8 +34,7 @@ async function setup() {
     if (!Array.isArray(dataTvShow) || dataTvShow.length === 0) {
       throw new Error("No Tv show found");
     }
-    // console.log(dataTvShow)
-    // console.log(dataTvShow)
+
     const episodeList = data
       .map((episode) => ({
         id: episode.id,
@@ -57,6 +56,10 @@ async function setup() {
       summary: show.summary,
       image: show.image?.medium || null,
     }));
+    // sort tv shows alphabetically
+    tvShowList.sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    );
 
     allEpisodes = episodeList;
     allTvShows = tvShowList;
@@ -206,6 +209,9 @@ function makePageForTvShow(showList) {
 // -----------TV shows drop-down select-----------
 function updateTvShowSelect() {
   const tvShows = document.querySelector("#tv-shows");
+  // Clear any existing options (important if function is called again)
+  tvShows.innerHTML = "";
+
   const tvShowDefaultOption = document.createElement("option");
   tvShowDefaultOption.value = "allTvShows";
   tvShowDefaultOption.text = "--Choose Tv show--";
