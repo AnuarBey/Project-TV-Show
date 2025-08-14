@@ -49,17 +49,14 @@ async function setup() {
         a.season === b.season ? a.number - b.number : a.season - b.season
       );
 
-
-      const tvShowList = dataTvShow.map((show) => ({
-        id: show.id,
-        name: show.name,
-        rating: show.rating?.average || "N/A",
-        genres: show.genres.join(","),
-        summary: show.summary,
-        image: show.image?.medium || null,
-      }));
-
-
+    const tvShowList = dataTvShow.map((show) => ({
+      id: show.id,
+      name: show.name,
+      rating: show.rating?.average || "N/A",
+      genres: show.genres.join(","),
+      summary: show.summary,
+      image: show.image?.medium || null,
+    }));
 
     allEpisodes = episodeList;
     allTvShows = tvShowList;
@@ -112,7 +109,6 @@ function showMessage(message, type = "info") {
 }
 
 function makePageForEpisodes(episodeList) {
-
   rootElem.innerHTML = "";
 
   const header = document.createElement("div");
@@ -142,7 +138,7 @@ function makePageForEpisodes(episodeList) {
 
     // Handle missing images gracefully
     const imgElement = episodeCard.querySelector(".episode-img");
-    if (episode.image.medium) {
+    if (episode.image && episode.image.medium) {
       imgElement.src = episode.image.medium;
     } else {
       imgElement.style.display = "none";
@@ -179,8 +175,8 @@ function updateEpisodeSelect() {
     selectEpisodeList.appendChild(option);
   }
 }
-
-function makePageForTvShow (showList){
+//tv show cards logic
+function makePageForTvShow(showList) {
   rootElem.innerHTML = "";
   //create div to hold all tv show cards
   const showListDiv = document.createElement("div");
@@ -189,7 +185,7 @@ function makePageForTvShow (showList){
 
   //clone Tv show  template
   const templateTvShow = document.getElementById("Tv-show-template");
-  showList.forEach((show)=>{
+  showList.forEach((show) => {
     const showCard = templateTvShow.content.cloneNode(true);
     showCard.querySelector(".tv-show-title").textContent = show.name;
     showCard.querySelector(".tv-show-rating").textContent = show.rating;
@@ -203,11 +199,10 @@ function makePageForTvShow (showList){
     } else {
       imgElementTvShow.style.display = "none";
     }
-     showListDiv.appendChild(showCard);
-  })
+    showListDiv.appendChild(showCard);
+  });
   updateTvShowSelect();
 }
-
 
 // -----------TV shows drop-down select-----------
 function updateTvShowSelect() {
@@ -226,12 +221,46 @@ function updateTvShowSelect() {
   }
 }
 
+// ------async function to fetch and display show episodes-------
+async function fetchAndDisplayShowEpisodes(showId) {
+  try {
+    // Show loading message
+    showMessage("Loading episodes...", "loading");
+
+    // TODO: I need to remember to change this to API call later
+    // const response = await fetch(`https://api.tvmaze.com/shows/${showId}/episodes`);
+    const response = await fetch("./episodes.json"); // Using mock data for now
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const episodes = await response.json();
+
+    const episodeList = episodes
+      .map((episode) => ({
+        id: episode.id,
+        name: episode.name,
+        season: episode.season,
+        number: episode.number,
+        summary: episode.summary,
+        image: episode.image,
+      }))
+      .sort((a, b) =>
+        a.season === b.season ? a.number - b.number : a.season - b.season
+      );
+    //this will update global episodes and display them
+    allEpisodes = episodeList;
+    makePageForEpisodes(episodeList);
+  } catch (error) {
+    console.error("Error fetching episodes:", error);
+    showMessage("Error loading episodes for this show", "error");
+  }
+}
 
 function initEventListeners() {
   //this handles episode selection
   const selectEpisodeList = document.querySelector("#drop-down-search");
-  const selectTvShow = document.querySelector("#tv-shows")
-
   if (selectEpisodeList) {
     selectEpisodeList.addEventListener("change", function () {
       const allEpisodeCode = this.value;
@@ -253,11 +282,18 @@ function initEventListeners() {
     });
   }
 
-  if(selectTvShow){
+  const selectTvShow = document.querySelector("#tv-shows");
+  if (selectTvShow) {
     selectTvShow.addEventListener("change", function () {
       const selectedTvShow = this.value;
-      console.log("Selected show:", selectedTvShow)
-    })
+      if(selectedTvShow === "allTvShows"){
+        console.log("show all Tv shows")
+      }else{
+        // Fetch and display episodes for selected show
+        fetchAndDisplayShowEpisodes(selectedTvShow);
+      }
+
+    });
   }
 }
 
