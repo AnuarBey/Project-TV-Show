@@ -51,7 +51,7 @@ async function setup() {
 
 
       const tvShowList = dataTvShow.map((show) => ({
-        // id: show.id,
+        id: show.id,
         name: show.name,
         rating: show.rating?.average || "N/A",
         genres: show.genres.join(","),
@@ -64,7 +64,7 @@ async function setup() {
     allEpisodes = episodeList;
     allTvShows = tvShowList;
 
-    // makePageForEpisodes(episodeList);
+    makePageForEpisodes(episodeList);
     makePageForTvShow(allTvShows);
     initEventListeners();
   } catch (error) {
@@ -182,7 +182,7 @@ function updateEpisodeSelect() {
 
 function makePageForTvShow (showList){
   rootElem.innerHTML = "";
-  //create div to hold all episode cards
+  //create div to hold all tv show cards
   const showListDiv = document.createElement("div");
   showListDiv.id = "show-list";
   rootElem.appendChild(showListDiv);
@@ -216,6 +216,14 @@ function updateTvShowSelect() {
   tvShowDefaultOption.value = "allTvShows";
   tvShowDefaultOption.text = "--Choose Tv show--";
   tvShows.appendChild(tvShowDefaultOption);
+
+  //Create Tv shows option and set value
+  for (let i = 0; i < allTvShows.length; i++) {
+    const option = document.createElement("option");
+    option.setAttribute("value", allTvShows[i].id);
+    option.text = allTvShows[i].name;
+    tvShows.appendChild(option);
+  }
 }
 
 
