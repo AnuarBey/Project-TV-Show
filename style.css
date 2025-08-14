@@ -209,3 +209,27 @@ a:hover {
 #search {
   padding: 7px;
 }
+
+
+/* Tv Show styles */
+
+.tv-show-card{
+  background: #2c2c2c;/* Optional background */
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.img-div img{
+  width: 50%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#show-list{
+ display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  width: 1200px;
+}
