@@ -230,6 +230,7 @@ function updateTvShowSelect() {
 function initEventListeners() {
   //this handles episode selection
   const selectEpisodeList = document.querySelector("#drop-down-search");
+  const selectTvShow = document.querySelector("#tv-shows")
 
   if (selectEpisodeList) {
     selectEpisodeList.addEventListener("change", function () {
@@ -250,6 +251,13 @@ function initEventListeners() {
         }
       }
     });
+  }
+
+  if(selectTvShow){
+    selectTvShow.addEventListener("change", function () {
+      const selectedTvShow = this.value;
+      console.log("Selected show:", selectedTvShow)
+    })
   }
 }
 
