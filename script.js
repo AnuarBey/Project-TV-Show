@@ -60,9 +60,8 @@ async function setup() {
 
     allEpisodes = episodeList;
     allTvShows = tvShowList;
-
-    makePageForEpisodes(episodeList);
     makePageForTvShow(allTvShows);
+    // makePageForEpisodes(episodeList);
     initEventListeners();
   } catch (error) {
     console.error("Error fetching episodes:", error);
@@ -286,13 +285,12 @@ function initEventListeners() {
   if (selectTvShow) {
     selectTvShow.addEventListener("change", function () {
       const selectedTvShow = this.value;
-      if(selectedTvShow === "allTvShows"){
-        console.log("show all Tv shows")
-      }else{
+      if (selectedTvShow === "allTvShows") {
+        console.log("show all Tv shows");
+      } else {
         // Fetch and display episodes for selected show
         fetchAndDisplayShowEpisodes(selectedTvShow);
       }
-
     });
   }
 }
