@@ -11,10 +11,9 @@ async function setup() {
     // Show loading message
     showMessage("Loading episodes...", "loading");
 
-    // const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
-    const response = await fetch("./episodes.json");
-    // const responseTvShow = await fetch("https://api.tvmaze.com/shows");
-    const responseTvShow = await fetch("./shows.json");
+    const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
+
+    const responseTvShow = await fetch("https://api.tvmaze.com/shows");
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -153,8 +152,8 @@ function makePageForEpisodes(episodeList) {
   updateEpisodeSelect();
 }
 
+//--------Episodes drop-down select------
 function updateEpisodeSelect() {
-  //query the selector select
   const selectEpisodeList = document.querySelector("#drop-down-search");
   if (!selectEpisodeList) return;
 
@@ -210,7 +209,7 @@ function makePageForTvShow(showList) {
 // -----------TV shows drop-down select-----------
 function updateTvShowSelect() {
   const tvShows = document.querySelector("#tv-shows");
-  // Clear any existing options (important if function is called again)
+  // Clear any existing options 
   tvShows.innerHTML = "";
 
   const tvShowDefaultOption = document.createElement("option");
@@ -240,9 +239,7 @@ async function fetchAndDisplayShowEpisodes(showId) {
     // Show loading message
     showMessage("Loading episodes...", "loading");
 
-    // TODO: I need to remember to change this to API call later
-    // const response = await fetch(`https://api.tvmaze.com/shows/${showId}/episodes`);
-    const response = await fetch("./episodes.json"); // Using mock data for now
+    const response = await fetch(`https://api.tvmaze.com/shows/${showId}/episodes`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
