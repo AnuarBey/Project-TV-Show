@@ -1,53 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TV Show Project | Anuar Duisenbek || AnuarBey</title>
+    <link href="style.css" rel="stylesheet" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TV Show Project | Anuar Duisenbek || AnuarBey</title>
-  <link href="style.css" rel="stylesheet" />
-  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-</head>
-
-<body>
-  <div class="header-search">
-    <select name="select-shows" id="tv-shows"></select>
-    <select name="episode-code" id="drop-down-search"></select>
-    <label for="search">
-      <input type="text" id="search" placeholder="Search for a movie..." />
-    </label>
-  </div>
-  <template id="episode-template">
-    <div class="episode-card">
-      <h2 class="episode-title"></h2>
-      <p class="episode-code"></p>
-      <img class="episode-img" src="" alt="Episode image" />
-
-      <div class="episode-summary"></div>
+  <body>
+    <div class="header-search">
+      <select name="select-shows" id="tv-shows"></select>
+      <select name="episode-code" id="drop-down-search"></select>
+      <label for="search">
+        <input
+          type="text"
+          id="search"
+          placeholder="Search shows..."
+          aria-label="Search" />
+      </label>
+      <button id="back-to-shows" style="display: none">← Back to Shows</button>
     </div>
-  </template>
-  <template id="Tv-show-template">
-    <div class="tv-show-card">
-      <div class="img-div">
-        <img class="tv-show-img" src="" alt="Tv show image" />
+
+    <template id="Tv-show-template">
+      <div class="tv-show-card">
+        <div class="show-left">
+          <div class="img-div">
+            <img class="tv-show-img" src="" alt="Tv show image" />
+          </div>
+          <div class="show-actions">
+            <button class="btn">Смотреть шоу</button>
+          </div>
+        </div>
+
+        <div class="show-center">
+          <h2 class="tv-show-title"></h2>
+          <div class="tv-show-info">
+            <p class="tv-show-rating"></p>
+            <p class="tv-show-genres"></p>
+            <p class="tv-show-status"></p>
+            <p class="tv-show-runtime"></p>
+          </div>
+        </div>
+        <div class="show-right">
+          <div class="tv-show-summary"></div>
+        </div>
       </div>
-      <h2 class="tv-show-title"></h2>
-      <p class="tv-show-rating"></p>
-      <p class="tv-show-genres"></p>
-      <div class="tv-show-summary"></div>
-    </div>
-  </template>
+    </template>
 
+    <template id="episode-template">
+      <div class="episode-card">
+        <h2 class="episode-title"></h2>
+        <p class="episode-code"></p>
+        <img class="episode-img" src="" alt="Episode image" />
+        <div class="episode-summary"></div>
+        <button class="watch-btn">Watch Episode</button>
+      </div>
+    </template>
 
-  <div id="root"></div>
-  <div id="episode-list"></div>
+    <div id="root"></div>
 
-  <footer class="data-source">
-    Data from <a href="https://www.tvmaze.com/" target="_blank">TVMaze.com</a>
-  </footer>
+    <footer class="data-source">
+      Data from <a href="https://www.tvmaze.com/" target="_blank">TVMaze.com</a>
+    </footer>
 
-  <!-- Loads YOUR javascript code -->
-  <script src="script.js"></script>
-</body>
-
+    <!-- Loads YOUR javascript code -->
+    <script src="script.js"></script>
+  </body>
 </html>
