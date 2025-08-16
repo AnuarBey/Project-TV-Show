@@ -3,56 +3,37 @@
 let allEpisodes = []; // store all episodes globally so that other functions can access it.
 let allTvShows = []; // store all Tv shows globally.
 let showEpisodesCache = {}; // Store fetched episodes to prevent duplicate fetches from Api.
+let currentView = "shows"; // Track current view: 'shows' or 'episodes'
+let currentShowId = null; // Track current show when viewing episodes
+
 const rootElem = document.getElementById("root");
 window.onload = setup;
 
 async function setup() {
   try {
     // Show loading message
-    showMessage("Loading episodes...", "loading");
+    showMessage("Loading shows...", "loading");
 
-    const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
-
+    // Only fetch TV shows - no more Game of Thrones episodes initially
     const responseTvShow = await fetch("https://api.tvmaze.com/shows");
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
 
     if (!responseTvShow.ok) {
       throw new Error(`HTTP error! status: ${responseTvShow.status}`);
     }
 
-    const data = await response.json();
     const dataTvShow = await responseTvShow.json();
-
-    // Check if we got valid data
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error("No episodes found for this show");
-    }
 
     if (!Array.isArray(dataTvShow) || dataTvShow.length === 0) {
       throw new Error("No Tv show found");
     }
 
-    const episodeList = data
-      .map((episode) => ({
-        id: episode.id,
-        name: episode.name,
-        season: episode.season,
-        number: episode.number,
-        summary: episode.summary,
-        image: episode.image,
-      }))
-      .sort((a, b) =>
-        a.season === b.season ? a.number - b.number : a.season - b.season
-      );
-
     const tvShowList = dataTvShow.map((show) => ({
       id: show.id,
       name: show.name,
       rating: show.rating?.average || "N/A",
-      genres: show.genres.join(","),
+      genres: show.genres.join(", "),
+      status: show.status || "Unknown",
+      runtime: show.runtime || "N/A",
       summary: show.summary,
       image: show.image?.medium || null,
     }));
@@ -61,10 +42,9 @@ async function setup() {
       a.name.toLowerCase().localeCompare(b.name.toLowerCase())
     );
 
-    allEpisodes = episodeList;
     allTvShows = tvShowList;
-    makePageForTvShow(allTvShows);
-    // makePageForEpisodes(episodeList);
+    currentView = "shows"; // Set current view to shows
+    makePageForTvShow(allTvShows); // Start with TV shows list
     initEventListeners();
   } catch (error) {
     console.error("Error fetching episodes:", error);
@@ -112,6 +92,13 @@ function showMessage(message, type = "info") {
 
 function makePageForEpisodes(episodeList) {
   rootElem.innerHTML = "";
+  currentView = "episodes"; // Set current view to episodes
+
+  // If no episodes found, show message
+  if (episodeList.length === 0) {
+    showMessage("No episodes found matching your search.", "info");
+    return;
+  }
 
   const header = document.createElement("div");
   header.id = "episode-count";
@@ -142,14 +129,30 @@ function makePageForEpisodes(episodeList) {
     const imgElement = episodeCard.querySelector(".episode-img");
     if (episode.image && episode.image.medium) {
       imgElement.src = episode.image.medium;
+      imgElement.alt = `${episode.name} episode image`;
     } else {
       imgElement.style.display = "none";
     }
 
+    // Add click event to Watch button
+    const watchBtn = episodeCard.querySelector(".watch-btn");
+    watchBtn.addEventListener("click", () => {
+      watchEpisode(episode);
+    });
+
     episodeListElem.appendChild(episodeCard);
   });
-
   updateEpisodeSelect();
+  updateNavigationControls();
+}
+
+// Function to handle watching episode
+function watchEpisode(episode) {
+  const episodeUrl =
+    episode.url || `https://www.tvmaze.com/episodes/${episode.id}`;
+
+  // Open in new tab
+  window.open(episodeUrl, "_blank");
 }
 
 //--------Episodes drop-down select------
@@ -180,6 +183,8 @@ function updateEpisodeSelect() {
 //tv show cards logic
 function makePageForTvShow(showList) {
   rootElem.innerHTML = "";
+  currentView = "shows"; // Set current view to shows
+
   //create div to hold all tv show cards
   const showListDiv = document.createElement("div");
   showListDiv.id = "show-list";
@@ -187,29 +192,53 @@ function makePageForTvShow(showList) {
 
   //clone Tv show  template
   const templateTvShow = document.getElementById("Tv-show-template");
+
   showList.forEach((show) => {
     const showCard = templateTvShow.content.cloneNode(true);
-    showCard.querySelector(".tv-show-title").textContent = show.name;
-    showCard.querySelector(".tv-show-rating").textContent = show.rating;
-    showCard.querySelector(".tv-show-genres").textContent = show.genres;
-    showCard.querySelector(".tv-show-summary").innerHTML = show.summary;
 
+    showCard.querySelector(".tv-show-title").textContent = show.name;
+    showCard.querySelector(
+      ".tv-show-rating"
+    ).textContent = `Rating: ${show.rating}`;
+    showCard.querySelector(
+      ".tv-show-genres"
+    ).textContent = `Genres: ${show.genres}`;
+    showCard.querySelector(
+      ".tv-show-status"
+    ).textContent = `Status: ${show.status}`;
+    showCard.querySelector(
+      ".tv-show-runtime"
+    ).textContent = `Runtime: ${show.runtime} min`;
+    showCard.querySelector(".tv-show-summary").innerHTML =
+      show.summary || "No summary available";
+
+    const button = showCard.querySelector(".btn");
+    if (button) {
+      button.type = "button";
+      button.addEventListener("click", () => {
+        currentShowId = show.id;
+        fetchAndDisplayShowEpisodes(show.id);
+      });
+    }
     // Handle tv show missing images gracefully
     const imgElementTvShow = showCard.querySelector(".tv-show-img");
     if (show.image) {
       imgElementTvShow.src = show.image;
+      imgElementTvShow.alt = `${show.name} poster`;
     } else {
       imgElementTvShow.style.display = "none";
     }
     showListDiv.appendChild(showCard);
   });
   updateTvShowSelect();
+  updateNavigationControls();
 }
 
 // -----------TV shows drop-down select-----------
 function updateTvShowSelect() {
   const tvShows = document.querySelector("#tv-shows");
-  // Clear any existing options 
+
+  // Clear any existing options
   tvShows.innerHTML = "";
 
   const tvShowDefaultOption = document.createElement("option");
@@ -226,20 +255,64 @@ function updateTvShowSelect() {
   }
 }
 
+// Navigation control visibility
+function updateNavigationControls() {
+  const tvShowSelect = document.querySelector("#tv-shows");
+  const episodeSelect = document.querySelector("#drop-down-search");
+  const backToShowsBtn = document.querySelector("#back-to-shows");
+  const searchInput = document.querySelector("#search");
+
+  if (currentView === "shows") {
+    // Show view: hide episode controls, show TV show selector
+    if (tvShowSelect) tvShowSelect.style.display = "block";
+    if (episodeSelect) episodeSelect.style.display = "none";
+    if (backToShowsBtn) backToShowsBtn.style.display = "none";
+    if (searchInput) searchInput.placeholder = "Search shows...";
+  } else if (currentView === "episodes") {
+    // Episode view: show episode controls, hide TV show selector
+    if (tvShowSelect) tvShowSelect.style.display = "none";
+    if (episodeSelect) episodeSelect.style.display = "block";
+    if (backToShowsBtn) backToShowsBtn.style.display = "block";
+    if (searchInput) searchInput.placeholder = "Search episodes...";
+  }
+}
+
+function returnToShowsListing() {
+  allEpisodes = []; // Clear episodes
+  currentView = "shows";
+  currentShowId = null;
+  makePageForTvShow(allTvShows);
+
+  // Clear search input
+  const searchInput = document.querySelector("#search");
+  if (searchInput) searchInput.value = "";
+}
+
+// Abort any previous fetch request
+let episodesAbort;
 // ------async function to fetch and display show episodes-------
 async function fetchAndDisplayShowEpisodes(showId) {
-  //Check cache first, if we already have the episode, use it.
+  if (!showId || showId === "allTvShows") return;
+  // If we are already viewing episodes for this show, return early
   if (showEpisodesCache[showId]) {
-    console.log("This is from episode catch:", showId);
     allEpisodes = showEpisodesCache[showId];
-    makePageForEpisodes(showEpisodesCache[showId]);
+    makePageForEpisodes(allEpisodes);
     return;
   }
+
+  //
+  if (episodesAbort) episodesAbort.abort();
+  episodesAbort = new AbortController();
+  const { signal } = episodesAbort;
+
   try {
     // Show loading message
     showMessage("Loading episodes...", "loading");
 
-    const response = await fetch(`https://api.tvmaze.com/shows/${showId}/episodes`);
+    const response = await fetch(
+      `https://api.tvmaze.com/shows/${showId}/episodes`,
+      { signal }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -255,6 +328,7 @@ async function fetchAndDisplayShowEpisodes(showId) {
         number: episode.number,
         summary: episode.summary,
         image: episode.image,
+        url: episode.url,
       }))
       .sort((a, b) =>
         a.season === b.season ? a.number - b.number : a.season - b.season
@@ -264,7 +338,8 @@ async function fetchAndDisplayShowEpisodes(showId) {
     showEpisodesCache[showId] = episodeList; // saves to cache
     makePageForEpisodes(episodeList);
   } catch (error) {
-    console.error("Error fetching episodes:", error);
+    if (error.name === "AbortError") return;
+    console.error(error);
     showMessage("Error loading episodes for this show", "error");
   }
 }
@@ -298,7 +373,7 @@ function initEventListeners() {
     selectTvShow.addEventListener("change", function () {
       const selectedTvShow = this.value;
       if (selectedTvShow === "allTvShows") {
-        console.log("show all Tv shows");
+        returnToShowsListing();
       } else {
         // Fetch and display episodes for selected show
         fetchAndDisplayShowEpisodes(selectedTvShow);
@@ -307,8 +382,14 @@ function initEventListeners() {
   }
 }
 
+//Handle back to shows button
+const backToShowsBtn = document.querySelector("#back-to-shows");
+if (backToShowsBtn) {
+  backToShowsBtn.addEventListener("click", returnToShowsListing);
+}
+
 //Get input field and listen to user type
-const input = document.querySelector("input");
+const input = document.querySelector("#search");
 if (input) {
   input.addEventListener("keyup", function () {
     render(input);
@@ -318,11 +399,25 @@ if (input) {
 //filters episodes based on user search and re-render the page.
 function render(input) {
   const value = (input?.value || "").toLowerCase();
-  const filteredEpisodes = allEpisodes.filter(function (episode) {
-    return (
-      episode.name.toLowerCase().includes(value) ||
-      (episode.summary && episode.summary.toLowerCase().includes(value))
-    );
-  });
-  makePageForEpisodes(filteredEpisodes);
+
+  if (currentView === "episodes") {
+    // We're viewing episodes - filter episodes
+    const filteredEpisodes = allEpisodes.filter(function (episode) {
+      return (
+        episode.name.toLowerCase().includes(value) ||
+        (episode.summary && episode.summary.toLowerCase().includes(value))
+      );
+    });
+    makePageForEpisodes(filteredEpisodes);
+  } else if (currentView === "shows") {
+    // We're viewing TV shows - filter TV shows
+    const filteredShows = allTvShows.filter(function (show) {
+      return (
+        show.name.toLowerCase().includes(value) ||
+        show.genres.toLowerCase().includes(value) ||
+        (show.summary && show.summary.toLowerCase().includes(value))
+      );
+    });
+    makePageForTvShow(filteredShows);
+  }
 }
