@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TV Show Project | Anuar Duisenbek || AnuarBey</title>
     <link href="style.css" rel="stylesheet" />
+
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   </head>
 
@@ -19,7 +20,13 @@
           placeholder="Search shows..."
           aria-label="Search" />
       </label>
-      <button id="back-to-shows" style="display: none">← Back to Shows</button>
+      <button
+        id="back-to-shows"
+        class="btn back-to-shows"
+        style="display: none">
+        ← Back to Shows
+      </button>
+      <div id="content-count" style="display: none"></div>
     </div>
 
     <template id="Tv-show-template">
@@ -28,8 +35,8 @@
           <div class="img-div">
             <img class="tv-show-img" src="" alt="Tv show image" />
           </div>
-          <div class="show-actions">
-            <button class="btn">Смотреть шоу</button>
+          <div>
+            <button class="btn show-actions">Watch show</button>
           </div>
         </div>
 
@@ -54,7 +61,7 @@
         <p class="episode-code"></p>
         <img class="episode-img" src="" alt="Episode image" />
         <div class="episode-summary"></div>
-        <button class="watch-btn">Watch Episode</button>
+        <button class="btn btn-watch-show">Watch Episode</button>
       </div>
     </template>
 
