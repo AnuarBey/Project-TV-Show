@@ -113,7 +113,7 @@ function showMessage(message, type = "info") {
     //Added clear search button
     const clearButton = document.createElement("button");
     clearButton.textContent = "Clear Search";
-    clearButton.className = "clear-search-button";
+    clearButton.className = "btn clear-search-button";
     clearButton.onclick = () => {
       const searchInput = document.querySelector("#search");
       if (searchInput) {
@@ -128,7 +128,7 @@ function showMessage(message, type = "info") {
   if (type === "error") {
     const retryButton = document.createElement("button");
     retryButton.textContent = "Try Again";
-    retryButton.className = "retry-button";
+    retryButton.className = "btn retry-button";
     retryButton.onclick = setup;
 
     messageContainer.appendChild(retryButton);
@@ -192,7 +192,7 @@ function makePageForEpisodes(episodeList) {
     }
 
     // Add click event to Watch button
-    const watchBtn = episodeCard.querySelector(".watch-btn");
+    const watchBtn = episodeCard.querySelector(".btn-watch-show");
     watchBtn.addEventListener("click", () => {
       watchEpisode(episode);
     });
@@ -221,7 +221,7 @@ function updateEpisodeSelect() {
   // default first option on select drop-down list
   const defaultOption = document.createElement("option");
   defaultOption.value = "allEpisodes"; //
-  defaultOption.text = "--- Show all episodes ---";
+  defaultOption.text = "Show all episodes";
   selectEpisodeList.appendChild(defaultOption);
 
   //Create episode option and set its value
@@ -309,7 +309,7 @@ function updateTvShowSelect() {
 
   const tvShowDefaultOption = document.createElement("option");
   tvShowDefaultOption.value = "allTvShows";
-  tvShowDefaultOption.text = "--Choose Tv show--";
+  tvShowDefaultOption.text = "Choose Tv show";
   tvShows.appendChild(tvShowDefaultOption);
 
   //Create Tv shows option and set value
