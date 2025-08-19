@@ -11,13 +11,6 @@ html {
   height: 100%;
 }
 
-body,
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
 #root {
   width: 100%;
   min-height: 100vh;
@@ -27,12 +20,6 @@ body,
   flex-direction: column;
   align-items: center;
   padding-bottom: 60px;
-}
-
-#episode-count {
-  font-size: 1.2rem;
-  color: #e5e5e5;
-  margin-bottom: 30px;
 }
 
 h1,
@@ -75,7 +62,7 @@ a:hover {
   flex-wrap: wrap;
   justify-content: center;
   align-items: stretch;
-  gap: 32px;
+  gap: 60px;
   height: 100%;
   width: 100%;
   max-width: 1200px;
@@ -84,6 +71,8 @@ a:hover {
 
 .episode-card {
   background: #2c2c2c;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
   padding: 16px;
@@ -96,8 +85,9 @@ a:hover {
 }
 
 .episode-card:hover {
-  transform: scale(1.05);
-  background: #353535;
+  transform: translateY(-5px);
+  border-color: rgba(229, 9, 20, 0.5);
+  box-shadow: 0 8px 32px rgba(229, 9, 20, 0.3);
 }
 
 .episode-card img {
@@ -124,16 +114,6 @@ a:hover {
   margin: 0 0 16px 0;
 }
 
-.watch-btn {
-  background: #e50914;
-  color: #fff;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s, transform 0.2s;
-}
 .episode-summary {
   display: flex;
   flex-direction: column;
@@ -155,11 +135,112 @@ a:hover {
   z-index: 100;
 }
 
+.message-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  gap: 24px;
+  padding: 40px 20px;
+}
+
 .message {
   padding: 20px;
-  margin: 20px;
-  border-radius: 5px;
+  border-radius: 12px;
   text-align: center;
+  font-size: 1.3rem;
+  max-width: 500px;
+}
+
+.message-suggestions {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 300px;
+  text-align: left;
+}
+
+.message-suggestions p {
+  color: #fff;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.message-suggestions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.message-suggestions li {
+  color: #e5e5e5;
+  padding: 8px 12px;
+  background: rgba(229, 9, 20, 0.1);
+  border: 1px solid rgba(229, 9, 20, 0.2);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.message-suggestions li:hover {
+  background: rgba(229, 9, 20, 0.15);
+  border-color: rgba(229, 9, 20, 0.3);
+  transform: translateX(4px);
+}
+
+.message-suggestions li:before {
+  content: "💡";
+  margin-right: 8px;
+  font-size: 0.9rem;
+}
+
+.message-suggestions li:nth-child(1):before {
+  content: "🔍";
+}
+
+.message-suggestions li:nth-child(2):before {
+  content: "✏️";
+}
+
+.message-suggestions li:nth-child(3):before {
+  content: "🎯";
+}
+
+.clear-search-button {
+  padding: 12px 24px;
+  background: #e50914;
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.3);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.clear-search-button:hover {
+  background: #b0060f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(229, 9, 20, 0.4);
+}
+
+.clear-search-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.3);
+}
+
+.message-icon {
+  font-size: 4rem;
+  opacity: 0.7;
 }
 
 .message-loading {
@@ -168,44 +249,15 @@ a:hover {
 }
 
 .message-error {
-  background-color: #ffebee;
-  color: #c62828;
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border: 2px solid rgba(244, 67, 54, 0.2);
 }
 
-.retry-button {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background-color: #1976d2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.retry-button:hover {
-  background-color: #0d47a1;
-}
-
-.retry-button:active {
-  background-color: #0b3c91;
-}
-/* drop down search */
-#drop-down-search {
-  width: 15%;
-  font-size: 0.9rem;
-  padding: 2px 5px;
-}
-#drop-down-search:focus,
-#tv-shows:focus {
-  outline: 2px solid #e50914;
-  outline-offset: 2px;
-}
-
-#tv-shows {
-  width: 15%;
-  font-size: 0.9rem;
-  padding: 2px 5px;
-  color: rgb(0, 0, 0);
+.message-info {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  border: 2px solid rgba(76, 175, 80, 0.2);
 }
 
 .selected-episode {
@@ -215,18 +267,106 @@ a:hover {
   transition: background 0.4s ease-in-out, transform 0.3s ease;
   transform: scale(1.05);
 }
+.selected-episode .btn-watch-show {
+  background: #fff; /* Белый фон */
+  color: #000; /* Черный текст */
+  border: 2px solid #fff; /* Белая рамка */
+  font-weight: 700; /* Жирный шрифт */
+}
 
 .header-search {
   display: flex;
+  justify-content: center;
   gap: 3rem;
-  margin-top: 30px;
+  max-width: 1200px;
+  margin: 30px 0 30px 0;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
 }
 
-#search {
-  padding: 7px;
+#search,
+select {
+  background: #333;
+  color: #fff;
+  border: 2px solid #555;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-size: 1rem;
+  transition: all 0.2s;
 }
 
-/* Tv Show styles */
+#search:hover {
+  border-color: #e50914;
+}
+
+#search:focus {
+  outline: none;
+  border-color: #e50914;
+  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.2);
+}
+
+select:focus {
+  outline: none;
+  border-color: #e50914;
+  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.2);
+}
+
+select:hover {
+  border-color: #e50914;
+}
+
+#content-count {
+  background: rgba(229, 9, 20, 0.1);
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.btn {
+  background: #e50914;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+}
+
+.btn:hover {
+  background: #b0060f;
+  transform: translateY(-2px);
+}
+
+.retry-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #e50914;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.back-to-shows {
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  transition: 0.2s ease;
+}
+
+.show-actions .btn {
+  padding: 10px 18px;
+}
+
+.btn-watch-show {
+  padding: 10px 16px;
+  font-size: 1rem;
+  transition: background-color 0.2s, transform 0.2s;
+  margin-top: auto;
+}
 
 .tv-show-card {
   display: grid;
@@ -254,15 +394,6 @@ a:hover {
   border-radius: 8px;
 }
 
-.show-actions .btn {
-  padding: 10px 18px;
-  border: none;
-  border-radius: 8px;
-  background: #e50914;
-  color: #fff;
-  cursor: pointer;
-}
-
 .show-center {
   display: flex;
   flex-direction: column;
@@ -272,6 +403,7 @@ a:hover {
   margin: 0;
   font-size: 1.6rem;
 }
+
 .tv-show-info p {
   margin: 0 0 6px;
   color: #ddd;
@@ -282,7 +414,7 @@ a:hover {
   flex-direction: column;
   gap: 20px;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 16px;
 }
