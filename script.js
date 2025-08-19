@@ -1,11 +1,15 @@
 //You can edit ALL of the code here
 
+const BASE_URL = "https://api.tvmaze.com";
+// Global variables
 let allEpisodes = []; // store all episodes globally so that other functions can access it.
 let allTvShows = []; // store all Tv shows globally.
 let showEpisodesCache = {}; // Store fetched episodes to prevent duplicate fetches from Api.
 let currentView = "shows"; // Track current view: 'shows' or 'episodes'
 let currentShowId = null; // Track current show when viewing episodes
 
+// Abort any previous fetch request
+let episodesAbort;
 const rootElem = document.getElementById("root");
 window.onload = setup;
 
@@ -15,7 +19,7 @@ async function setup() {
     showMessage("Loading shows...", "loading");
 
     // Only fetch TV shows - no more Game of Thrones episodes initially
-    const responseTvShow = await fetch("https://api.tvmaze.com/shows");
+    const responseTvShow = await fetch(`${BASE_URL}/shows`);
 
     if (!responseTvShow.ok) {
       throw new Error(`HTTP error! status: ${responseTvShow.status}`);
@@ -72,22 +76,77 @@ function showMessage(message, type = "info") {
   const rootElem = document.getElementById("root");
   rootElem.innerHTML = "";
 
+  const messageContainer = document.createElement("div");
+  messageContainer.className = "message-container";
+
+  // Add icon based on message type
+  const icon = document.createElement("div");
+  icon.className = "message-icon";
+  if (type === "info") {
+    icon.innerHTML = "🔍"; // Search icon for "no results"
+  } else if (type === "error") {
+    icon.innerHTML = "⚠️"; // Warning icon for errors
+  } else if (type === "loading") {
+    icon.innerHTML = "⏳"; // Loading icon
+  }
+
   const messageDiv = document.createElement("div");
   messageDiv.className = `message message-${type}`;
   messageDiv.textContent = message;
 
+  messageContainer.appendChild(icon);
+  messageContainer.appendChild(messageDiv);
+
+  //Suggestions for "no results" message
+  if (type === "info" && message.includes("No")) {
+    const suggestionDiv = document.createElement("div");
+    suggestionDiv.className = "message-suggestions";
+    suggestionDiv.innerHTML = `
+    <p>Try:</p>
+    <ul>
+      <li>Different keywords</li>
+      <li>Checking spelling</li>
+      <li>More general search terms</li>
+    </ul>
+  `;
+
+    //Added clear search button
+    const clearButton = document.createElement("button");
+    clearButton.textContent = "Clear Search";
+    clearButton.className = "btn clear-search-button";
+    clearButton.onclick = () => {
+      const searchInput = document.querySelector("#search");
+      if (searchInput) {
+        searchInput.value = "";
+        render(searchInput);
+      }
+    };
+    messageContainer.appendChild(suggestionDiv);
+    messageContainer.appendChild(clearButton);
+  }
   // Add retry button for errors
   if (type === "error") {
     const retryButton = document.createElement("button");
     retryButton.textContent = "Try Again";
-    retryButton.className = "retry-button";
+    retryButton.className = "btn retry-button";
     retryButton.onclick = setup;
 
-    messageDiv.appendChild(document.createElement("br"));
-    messageDiv.appendChild(retryButton);
+    messageContainer.appendChild(retryButton);
   }
 
-  rootElem.appendChild(messageDiv);
+  // Append the entire container to root (not just messageDiv)
+  rootElem.appendChild(messageContainer);
+  // Hide counter when showing message
+  updateContentCounter("", false);
+}
+
+// This will show the number of episodes or shows found
+function updateContentCounter(text, show = true) {
+  const counter = document.getElementById("content-count");
+  if (counter) {
+    counter.textContent = text;
+    counter.style.display = show ? "block" : "none";
+  }
 }
 
 function makePageForEpisodes(episodeList) {
@@ -100,10 +159,8 @@ function makePageForEpisodes(episodeList) {
     return;
   }
 
-  const header = document.createElement("div");
-  header.id = "episode-count";
-  header.textContent = `Got ${episodeList.length} episode(s)`;
-  rootElem.appendChild(header);
+  // Function to update content counter
+  updateContentCounter(`Got ${episodeList.length} episode(s)`);
 
   //create div to hold all episode cards
   const episodeListElem = document.createElement("div");
@@ -135,7 +192,7 @@ function makePageForEpisodes(episodeList) {
     }
 
     // Add click event to Watch button
-    const watchBtn = episodeCard.querySelector(".watch-btn");
+    const watchBtn = episodeCard.querySelector(".btn-watch-show");
     watchBtn.addEventListener("click", () => {
       watchEpisode(episode);
     });
@@ -148,8 +205,7 @@ function makePageForEpisodes(episodeList) {
 
 // Function to handle watching episode
 function watchEpisode(episode) {
-  const episodeUrl =
-    episode.url || `https://www.tvmaze.com/episodes/${episode.id}`;
+  const episodeUrl = episode.url || `${BASE_URL}/episodes/${episode.id}`;
 
   // Open in new tab
   window.open(episodeUrl, "_blank");
@@ -165,7 +221,7 @@ function updateEpisodeSelect() {
   // default first option on select drop-down list
   const defaultOption = document.createElement("option");
   defaultOption.value = "allEpisodes"; //
-  defaultOption.text = "--- Show all episodes ---";
+  defaultOption.text = "Show all episodes";
   selectEpisodeList.appendChild(defaultOption);
 
   //Create episode option and set its value
@@ -180,10 +236,20 @@ function updateEpisodeSelect() {
     selectEpisodeList.appendChild(option);
   }
 }
+
 //tv show cards logic
 function makePageForTvShow(showList) {
   rootElem.innerHTML = "";
   currentView = "shows"; // Set current view to shows
+
+  // If no shows found, show message
+  if (showList.length === 0) {
+    showMessage("No shows found matching your search.", "info");
+    return;
+  }
+
+  // Function to update content counter
+  updateContentCounter(`Got ${showList.length} show(s)`);
 
   //create div to hold all tv show cards
   const showListDiv = document.createElement("div");
@@ -243,7 +309,7 @@ function updateTvShowSelect() {
 
   const tvShowDefaultOption = document.createElement("option");
   tvShowDefaultOption.value = "allTvShows";
-  tvShowDefaultOption.text = "--Choose Tv show--";
+  tvShowDefaultOption.text = "Choose Tv show";
   tvShows.appendChild(tvShowDefaultOption);
 
   //Create Tv shows option and set value
@@ -288,15 +354,22 @@ function returnToShowsListing() {
   if (searchInput) searchInput.value = "";
 }
 
-// Abort any previous fetch request
-let episodesAbort;
 // ------async function to fetch and display show episodes-------
 async function fetchAndDisplayShowEpisodes(showId) {
   if (!showId || showId === "allTvShows") return;
+
+  // Reset current show ID and view
+  currentShowId = showId;
+  currentView = "episodes";
+
   // If we are already viewing episodes for this show, return early
   if (showEpisodesCache[showId]) {
     allEpisodes = showEpisodesCache[showId];
     makePageForEpisodes(allEpisodes);
+
+    // Clear search input if we are switching to episodes view
+    const searchInput = document.querySelector("#search");
+    if (searchInput) searchInput.value = "";
     return;
   }
 
@@ -309,10 +382,9 @@ async function fetchAndDisplayShowEpisodes(showId) {
     // Show loading message
     showMessage("Loading episodes...", "loading");
 
-    const response = await fetch(
-      `https://api.tvmaze.com/shows/${showId}/episodes`,
-      { signal }
-    );
+    const response = await fetch(`${BASE_URL}/shows/${showId}/episodes`, {
+      signal,
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -380,20 +452,19 @@ function initEventListeners() {
       }
     });
   }
-}
+  //Handle back to shows button
+  const backToShowsBtn = document.querySelector("#back-to-shows");
+  if (backToShowsBtn) {
+    backToShowsBtn.addEventListener("click", returnToShowsListing);
+  }
 
-//Handle back to shows button
-const backToShowsBtn = document.querySelector("#back-to-shows");
-if (backToShowsBtn) {
-  backToShowsBtn.addEventListener("click", returnToShowsListing);
-}
-
-//Get input field and listen to user type
-const input = document.querySelector("#search");
-if (input) {
-  input.addEventListener("keyup", function () {
-    render(input);
-  });
+  //Get input field and listen to user type
+  const input = document.querySelector("#search");
+  if (input) {
+    input.addEventListener("keyup", function () {
+      render(input);
+    });
+  }
 }
 
 //filters episodes based on user search and re-render the page.
